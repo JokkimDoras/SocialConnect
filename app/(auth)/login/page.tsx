@@ -55,7 +55,7 @@ export default function LoginPage () {
                 placeholder="Enter the Password"
                 onChange={e => setPassword(e.target.value)}
                 />
-                <Button className="w-full" onClick={handleLogin} disabled={loading}>
+                <Button className="w-full p-6 cursor-pointer " onClick={handleLogin} disabled={loading}>
                     Login
                 </Button>
                 <p className="text-center text-sm">
