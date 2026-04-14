@@ -18,14 +18,12 @@ export default function LoginPage () {
    setLoading(true);
    setError('');
 
-   console.log('Logging in with:', email, password) 
 
    const {error} = await supabase.auth.signInWithPassword({
     email,
     password
    })
 
-   console.log('Error:', error) 
 
    if(error) {
     setError(error.message)
@@ -55,7 +53,7 @@ export default function LoginPage () {
                 placeholder="Enter the Password"
                 onChange={e => setPassword(e.target.value)}
                 />
-                <Button className="w-full p-6 cursor-pointer " onClick={handleLogin} disabled={loading}>
+{error && <p className="text-red-500 text-sm">{error}</p>}                <Button className="w-full p-6 cursor-pointer " onClick={handleLogin} disabled={loading}>
                     Login
                 </Button>
                 <p className="text-center text-sm">

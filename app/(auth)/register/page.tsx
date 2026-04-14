@@ -29,7 +29,6 @@ export default function RegisterPage () {
     const handleRegister = async() => {
         setLoading(true)
         setError('')
-        console.log('Registering with:', formData) // add this line
 
 
         if(formData.username.length<5 || formData.username.length >30){
