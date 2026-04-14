@@ -22,9 +22,6 @@ export async function POST(req: Request, { params }: { params: { post_id: string
         }
 
         await supabase.from('likes').insert({ user_id, post_id: params.post_id })
-        await supabase.from('posts')
-            .update({ like_count: supabase.rpc('increment', { row_id: params.post_id }) })
-            .eq('id', params.post_id)
 
         const { data: post } = await supabase.from('posts').select('like_count').eq('id', params.post_id).single()
         await supabase.from('posts').update({ like_count: (post?.like_count || 0) + 1 }).eq('id', params.post_id)

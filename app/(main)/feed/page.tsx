@@ -24,7 +24,11 @@ export default function FeedPage() {
             .select(`*, profiles(username, avatar_url)`)
             .order('created_at', { ascending: false })
         if (error) console.log(error)
-        else setPosts(data || [])
+        else {
+            console.log('Posts fetched:', data?.length)
+            console.log('First post:', data?.[0]?.id) // add this
+            setPosts([...(data || [])])
+        }
     }
 
     return (

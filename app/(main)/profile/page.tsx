@@ -35,22 +35,17 @@ export default function ProfilePage() {
     }
 
     const fetchProfile = async (userId: string) => {
-        const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', userId)
-            .single()
-
-        if (error) console.log(error)
-        else {
-            setProfile(data)
+        const res = await fetch(`/api/users/${userId}`)
+        const data = await res.json()
+        if (data.user) {
+            setProfile(data.user)
             setFormData({
-                username: data.username || '',
-                first_name: data.first_name || '',
-                last_name: data.last_name || '',
-                bio: data.bio || '',
-                website: data.website || '',
-                location: data.location || '',
+                username: data.user.username || '',
+                first_name: data.user.first_name || '',
+                last_name: data.user.last_name || '',
+                bio: data.user.bio || '',
+                website: data.user.website || '',
+                location: data.user.location || '',
             })
         }
     }
@@ -68,23 +63,23 @@ export default function ProfilePage() {
 
     const handleUpdate = async () => {
         setLoading(true)
-        const { error } = await supabase
-            .from('profiles')
-            .update({
-                username: formData.username,
-                first_name: formData.first_name,
-                last_name: formData.last_name,
-                bio: formData.bio,
-                website: formData.website,
-                location: formData.location,
-            })
-            .eq('id', user?.id)
-
-        if (error) console.log(error)
-        else {
-            fetchProfile(user?.id)
-            setEditing(false)
+        
+        const res = await fetch(`/api/users/${user?.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        })
+    
+        const data = await res.json()
+    
+        if (!res.ok) {
+            console.log(data.error)
+            setLoading(false)
+            return
         }
+    
+        fetchProfile(user?.id)
+        setEditing(false)
         setLoading(false)
     }
 

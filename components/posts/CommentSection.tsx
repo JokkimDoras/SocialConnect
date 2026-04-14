@@ -1,5 +1,5 @@
 'use client'
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 
@@ -23,37 +23,36 @@ export default function CommentSection({ postId, userId, onCommentChange }: Comm
         else setComments(data || [])
     }
 
-    useState(() => {
+    useEffect(() => {
         fetchComments()
-    })
+    },[postId])
 
     const handleComment = async () => {
         if (!commentText.trim()) return
-        const { error } = await supabase
-            .from('comments')
-            .insert({ content: commentText, user_id: userId, post_id: postId })
-        if (error) console.log(error)
+    
+        const res = await fetch(`/api/posts/${postId}/comments`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content: commentText, user_id: userId })
+        })
+        const data = await res.json()
+        if (data.error) console.log(data.error)
         else {
-            await supabase
-                .from('posts')
-                .update({ comment_count: comments.length + 1 })
-                .eq('id', postId)
             setCommentText('')
             fetchComments()
-            onCommentChange()
+            // ← removed onCommentChange() here
         }
     }
-
+    
     const handleDeleteComment = async (commentId: string) => {
-        await supabase.from('comments').delete().eq('id', commentId)
-        await supabase
-            .from('posts')
-            .update({ comment_count: comments.length - 1 })
-            .eq('id', postId)
+        await fetch(`/api/posts/${postId}/comments/${commentId}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: userId })
+        })
         fetchComments()
         onCommentChange()
     }
-
     return (
         <div className="mt-2 space-y-2 border-t pt-2">
             {comments.map(c => (

@@ -1,9 +1,9 @@
 'use client'
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { Button, } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 
 export default function RegisterPage () {
@@ -26,45 +26,46 @@ export default function RegisterPage () {
 
     }
 
-    const handleRegister = async() => {
-        setLoading(true)
-        setError('')
-
-
-        if(formData.username.length<5 || formData.username.length >30){
-            setError("UserName must be between 3 and 30 characters");
-            setLoading(false)
-            return;
-        }
-        const { data,error} = await supabase.auth.signUp({
-            email:formData.email,
-            password:formData.password,
-        })
-        if(error){
-            setError(error.message)
-            setLoading(false)
-            return;
-        }
-        if(data.user){
-            const { error : profileError } = await supabase.from('profiles').insert({
-                id:data.user.id,
-                username:formData.username,
-                first_name:formData.first_name,
-                last_name:formData.last_name,
-            })
-
-            if (profileError) {
-                setError(profileError.message)
-                setLoading(false)
-                return
-              }
-
-        }
-
-        router.push('/feed')
-
-
-    }
+    const handleRegister = async () => {
+      setLoading(true)
+      setError('')
+  
+      if (formData.username.length < 3 || formData.username.length > 30) {
+          setError('Username must be between 3 and 30 characters')
+          setLoading(false)
+          return
+      }
+  
+      // Call API route
+      const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+      })
+  
+      const data = await res.json()
+  
+      if (!res.ok) {
+          setError(data.error)
+          setLoading(false)
+          return
+      }
+  
+      // Create Supabase session
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password
+      })
+  
+      if (signInError) {
+          setError(signInError.message)
+          setLoading(false)
+          return
+      }
+  
+      router.push('/feed')
+      setLoading(false)
+  }
 
     return (
         <div className="min-h-screen flex items-center justify-center">

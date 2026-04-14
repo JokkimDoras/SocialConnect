@@ -49,24 +49,30 @@ export async function PATCH(req: Request, { params }: { params: { post_id: strin
     }
 }
 
-export async function DELETE(req: Request, { params }: { params: { post_id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ post_id: string }> }) {
     try {
+        const { post_id } = await params
         const { author_id } = await req.json()
 
         const { data: post } = await supabase
             .from('posts')
             .select('author_id')
-            .eq('id', params.post_id)
+            .eq('id', post_id)
             .single()
+
+        if (!post) {
+            return NextResponse.json({ error: 'Post not found' }, { status: 404 })
+        }
 
         if (post?.author_id !== author_id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
         }
 
-        const { error } = await supabase.from('posts').delete().eq('id', params.post_id)
+        const { error } = await supabase.from('posts').delete().eq('id', post_id)
         if (error) return NextResponse.json({ error: error.message }, { status: 400 })
         return NextResponse.json({ message: 'Post deleted successfully' }, { status: 200 })
     } catch (error) {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
+
 }

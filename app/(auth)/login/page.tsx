@@ -15,24 +15,37 @@ export default function LoginPage () {
 
 
     const handleLogin = async () => {
-   setLoading(true);
-   setError('');
-
-
-   const {error} = await supabase.auth.signInWithPassword({
-    email,
-    password
-   })
-
-
-   if(error) {
-    setError(error.message)
-    setLoading(false)
-    return
-   }
-
-   router.push('/feed')
-
+        setLoading(true)
+        setError('')
+    
+        const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        })
+    
+        const data = await res.json()
+    
+        if (!res.ok) {
+            setError(data.error)
+            setLoading(false)
+            return
+        }
+    
+        // Create Supabase session for middleware
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+            email,
+            password
+        })
+    
+        if (signInError) {
+            setError(signInError.message)
+            setLoading(false)
+            return
+        }
+    
+        router.push('/feed')
+        setLoading(false)
     }
 
     return (

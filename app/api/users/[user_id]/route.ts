@@ -6,12 +6,14 @@ const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-export async function GET(req: Request, { params }: { params: { user_id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ user_id: string }> }) {
     try {
+        const { user_id } = await params
+
         const { data, error } = await supabase
             .from('profiles')
             .select('*')
-            .eq('id', params.user_id)
+            .eq('id', user_id)
             .single()
 
         if (error) return NextResponse.json({ error: 'User not found' }, { status: 404 })
@@ -19,7 +21,7 @@ export async function GET(req: Request, { params }: { params: { user_id: string 
         const { count } = await supabase
             .from('posts')
             .select('*', { count: 'exact' })
-            .eq('author_id', params.user_id)
+            .eq('author_id', user_id)
 
         return NextResponse.json({ user: { ...data, posts_count: count } }, { status: 200 })
     } catch (error) {
@@ -27,8 +29,9 @@ export async function GET(req: Request, { params }: { params: { user_id: string 
     }
 }
 
-export async function PATCH(req: Request, { params }: { params: { user_id: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ user_id: string }> }) {
     try {
+        const { user_id } = await params
         const { bio, avatar_url, website, location, username, first_name, last_name } = await req.json()
 
         if (bio && bio.length > 160) {
@@ -38,7 +41,7 @@ export async function PATCH(req: Request, { params }: { params: { user_id: strin
         const { data, error } = await supabase
             .from('profiles')
             .update({ bio, avatar_url, website, location, username, first_name, last_name, updated_at: new Date().toISOString() })
-            .eq('id', params.user_id)
+            .eq('id', user_id)
             .select()
             .single()
 

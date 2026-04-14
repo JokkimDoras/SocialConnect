@@ -18,6 +18,7 @@ export default function PostCard({ post, user, onRefresh }: PostCardProps) {
     const [likingPost, setLikingPost] = useState(false)
     const [openComment, setOpenComment] = useState(false)
     const [isLiked ,setIsLiked] = useState(false)
+    const [likeCount, setLikeCount] = useState(post.like_count)
 
 
     useEffect(() => {
@@ -33,39 +34,48 @@ export default function PostCard({ post, user, onRefresh }: PostCardProps) {
         if (user?.id) checkLike()
     }, [user?.id])
 
+
     const handleLike = async () => {
         if (likingPost) return
         setLikingPost(true)
-        const { data: existingLike } = await supabase
-            .from('likes')
-            .select('*')
-            .eq('user_id', user?.id)
-            .eq('post_id', post.id)
-            .maybeSingle()
-
-        if (existingLike) {
-            await supabase.from('likes').delete()
-                .eq('user_id', user?.id)
-                .eq('post_id', post.id)
-            await supabase.from('posts')
-                .update({ like_count: post.like_count - 1 })
-                .eq('id', post.id)
-                setIsLiked(false)
+    
+        if (isLiked) {
+            await fetch(`/api/posts/${post.id}/like`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: user?.id })
+            })
+            setIsLiked(false)
+            setLikeCount((prev: number) => prev - 1)
         } else {
-            await supabase.from('likes')
-                .insert({ user_id: user?.id, post_id: post.id })
-            await supabase.from('posts')
-                .update({ like_count: post.like_count + 1 })
-                .eq('id', post.id)
-                setIsLiked(true)
+            await fetch(`/api/posts/${post.id}/like`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: user?.id })
+            })
+            setIsLiked(true)
+            setLikeCount((prev: number) => prev + 1)
         }
+    
         setLikingPost(false)
         onRefresh()
     }
 
     const handleDelete = async () => {
-        await supabase.from('posts').delete().eq('id', post.id)
-        onRefresh()
+        console.log('User id:', user?.id)
+        console.log('Post author_id:', post.author_id)
+        
+        const res = await fetch(`/api/posts/${post.id}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ author_id: user?.id })
+        })
+        const data = await res.json()
+        console.log('Response:', data)
+        
+        if (data.message === 'Post deleted successfully') {
+            onRefresh()  // ← call refresh after successful delete
+        }
     }
 
     return (
@@ -88,7 +98,7 @@ export default function PostCard({ post, user, onRefresh }: PostCardProps) {
                     <Button variant="ghost" size="sm"
                         onClick={handleLike}
                         disabled={likingPost}>
-                            {isLiked? <AiFillHeart className="text-red-500 mr-1"/>:<CiHeart/>}{post.like_count}
+                            {isLiked? <AiFillHeart className="text-red-500 mr-1"/>:<CiHeart/>}{likeCount}
                     </Button>
                     <Button  variant="ghost" size="sm"
                         onClick={() => setOpenComment(!openComment)}>
