@@ -40,7 +40,6 @@ export default function CommentSection({ postId, userId, onCommentChange }: Comm
         else {
             setCommentText('')
             fetchComments()
-            // ← removed onCommentChange() here
         }
     }
     

@@ -25,15 +25,7 @@ export default function PostCard({ post, user, onRefresh,isFollowing,onFollowCha
   
 
     useEffect(() => {
-        const checkFollow = async () => {
-            const { data } = await supabase
-                .from('follows')
-                .select('*')
-                .eq('follower_id', user?.id)
-                .eq('following_id', post.author_id)
-                .maybeSingle()
-        }
-        if (user?.id && post.author_id !== user?.id) checkFollow()
+
         const checkLike = async () => {
             const { data } = await supabase
                 .from('likes')
@@ -76,6 +68,7 @@ export default function PostCard({ post, user, onRefresh,isFollowing,onFollowCha
         }
         onFollowChange()
     }
+    
 
     const handleLike = async () => {
         if (likingPost) return
@@ -104,8 +97,7 @@ export default function PostCard({ post, user, onRefresh,isFollowing,onFollowCha
     }
 
     const handleDelete = async () => {
-        console.log('User id:', user?.id)
-        console.log('Post author_id:', post.author_id)
+        
         
         const res = await fetch(`/api/posts/${post.id}`, {
             method: 'DELETE',
@@ -113,7 +105,6 @@ export default function PostCard({ post, user, onRefresh,isFollowing,onFollowCha
             body: JSON.stringify({ author_id: user?.id })
         })
         const data = await res.json()
-        console.log('Response:', data)
         
         if (data.message === 'Post deleted successfully') {
             onRefresh()  // ← call refresh after successful delete
