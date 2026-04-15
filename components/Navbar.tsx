@@ -3,6 +3,8 @@ import Link from "next/link"
 import { supabase } from "@/lib/supabase"
 import { useRouter, usePathname } from "next/navigation"
 import { CgProfile } from "react-icons/cg";
+import { RiHome6Line } from "react-icons/ri";
+
 
 export default function Navbar() {
     const router = useRouter()
@@ -23,7 +25,13 @@ export default function Navbar() {
 
                 {/* Links */}
                 <div className="flex items-center gap-2">
-                  
+                <Link href="/feed" className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                        pathname === '/feed'
+                        ? 'bg-blue-50 text-[#1877F2]'
+                        : 'text-gray-600 hover:bg-gray-100'
+                    }`}>
+                        <RiHome6Line  size={30}/> 
+                    </Link>                  
                     <Link href="/profile" className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                         pathname === '/profile'
                         ? 'bg-blue-50 text-[#1877F2]'

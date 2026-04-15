@@ -1,10 +1,6 @@
 'use client'
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
 
 export default function ProfilePage() {
     const [user, setUser] = useState<any>(null)

@@ -21,14 +21,15 @@ export async function GET(req: Request, { params }: { params: { post_id: string 
     }
 }
 
-export async function PATCH(req: Request, { params }: { params: { post_id: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ post_id: string }> }) {
     try {
+        const { post_id } = await params  // ← await params!
         const { content, author_id } = await req.json()
 
         const { data: post } = await supabase
             .from('posts')
             .select('author_id')
-            .eq('id', params.post_id)
+            .eq('id', post_id)
             .single()
 
         if (post?.author_id !== author_id) {
@@ -38,7 +39,7 @@ export async function PATCH(req: Request, { params }: { params: { post_id: strin
         const { data, error } = await supabase
             .from('posts')
             .update({ content, updated_at: new Date().toISOString() })
-            .eq('id', params.post_id)
+            .eq('id', post_id)
             .select()
             .single()
 
