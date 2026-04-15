@@ -6,12 +6,13 @@ const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-export async function GET(req: Request, { params }: { params: { post_id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ post_id: string }> }) {
     try {
+        const { post_id } = await params
         const { data, error } = await supabase
             .from('posts')
             .select(`*, profiles(username, avatar_url)`)
-            .eq('id', params.post_id)
+            .eq('id', post_id)
             .single()
 
         if (error) return NextResponse.json({ error: error.message }, { status: 404 })
@@ -23,7 +24,7 @@ export async function GET(req: Request, { params }: { params: { post_id: string 
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ post_id: string }> }) {
     try {
-        const { post_id } = await params  // ← await params!
+        const { post_id } = await params
         const { content, author_id } = await req.json()
 
         const { data: post } = await supabase
@@ -49,7 +50,6 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ post_i
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 }
-
 export async function DELETE(req: Request, { params }: { params: Promise<{ post_id: string }> }) {
     try {
         const { post_id } = await params
