@@ -43,5 +43,5 @@ export async function middleware(req:NextRequest){
 }
 
 export const config = {
-    matcher:['/feed','/profile','/login','/register']
+    matcher: ['/feed', '/profile', '/profile/:path*', '/login', '/register']
 }
