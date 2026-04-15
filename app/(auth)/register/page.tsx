@@ -67,58 +67,95 @@ export default function RegisterPage () {
       setLoading(false)
   }
 
-    return (
-        <div className="min-h-screen flex items-center justify-center">
-            <div className="w-full max-w-md p-8 space-y-4">
-                <h1 className="text-2xl font-bold text-center">Create an Account</h1>
-                {error && <p className="text-red-500 text-sm">{error}</p>}
-                
-        <Input
-          name="first_name"
-          placeholder="First Name"
-          value={formData.first_name}
-          onChange={handleChange}
-        />
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+            {/* Logo */}
+            <div className="text-center mb-8">
+                <h1 className="text-4xl font-extrabold text-[#1877F2]">SocialNetwork</h1>
+                <p className="text-gray-500 mt-2">Create an account and join us!</p>
+            </div>
 
-        <Input
-          name="last_name"
-          placeholder="Last Name"
-          value={formData.last_name}
-          onChange={handleChange}
-        />
+            {/* Card */}
+            <div className="bg-white rounded-2xl shadow-lg p-8 space-y-4">
+                <h2 className="text-2xl font-bold text-gray-800 text-center">Create Account</h2>
 
-        <Input
-          name="username"
-          placeholder="Username"
-          value={formData.username}
-          onChange={handleChange}
-        />
+                {error && (
+                    <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+                        {error}
+                    </div>
+                )}
 
-        <Input
-          name="email"
-          type="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-        />
+                <div className="grid grid-cols-2 gap-3">
+                    <input
+                        name="first_name"
+                        placeholder="First Name"
+                        value={formData.first_name}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#1877F2] focus:ring-2 focus:ring-blue-100"
+                    />
+                    <input
+                        name="last_name"
+                        placeholder="Last Name"
+                        value={formData.last_name}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#1877F2] focus:ring-2 focus:ring-blue-100"
+                    />
+                </div>
 
-        <Input
-          name="password"
-          type="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-        />
+                <input
+                    name="username"
+                    placeholder="Username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#1877F2] focus:ring-2 focus:ring-blue-100"
+                />
 
-        <Button className="w-full" onClick={handleRegister} disabled={loading}>
-          {loading ? 'Creating account...' : 'Register'}
-        </Button>
+                <input
+                    name="email"
+                    type="email"
+                    placeholder="Email address"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#1877F2] focus:ring-2 focus:ring-blue-100"
+                />
 
-        <p className="text-center text-sm">Already have an account?{' '}
+                <input
+                    name="password"
+                    type="password"
+                    placeholder="Password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#1877F2] focus:ring-2 focus:ring-blue-100"
+                />
 
-        <Link href='/login' className="text-blue-500 hover:underline">Login</Link>
-        </p>
+                <button
+                    onClick={handleRegister}
+                    disabled={loading}
+                    className="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white font-bold py-3 rounded-xl transition-all disabled:opacity-50"
+                >
+                    {loading ? 'Creating account...' : 'Create Account'}
+                </button>
+
+                <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-200"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                        <span className="bg-white px-4 text-gray-400">or</span>
+                    </div>
+                </div>
+
+                <div className="text-center">
+                    <p className="text-sm text-gray-500">
+                        Already have an account?{' '}
+                        <Link href="/login" className="text-[#1877F2] font-semibold hover:underline">
+                            Log In
+                        </Link>
+                    </p>
+                </div>
             </div>
         </div>
-    )
+    </div>
+)
 }

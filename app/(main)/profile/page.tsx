@@ -125,115 +125,161 @@ export default function ProfilePage() {
     }
 
     return (
-        <div className="max-w-2xl mx-auto p-4 space-y-4">
-            {/* Profile Card */}
-            <Card className="p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-2xl font-bold">
-                        {avatarPreview || profile?.avatar_url ? (
-        <img 
-            src={avatarPreview || profile?.avatar_url} 
-            alt="avatar" 
-            className="w-full h-full object-cover"
-        />
-    ) : (
-        profile?.username?.[0]?.toUpperCase()
-    )}
+        <div className="min-h-screen bg-gray-50">
+            <div className="max-w-2xl mx-auto p-4 space-y-4">
+                {/* Profile Card */}
+                <div className="bg-white rounded-2xl shadow-sm p-6 space-y-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            {/* Avatar */}
+                            <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center text-3xl font-bold overflow-hidden border-4 border-white shadow-md">
+                                {avatarPreview || profile?.avatar_url ? (
+                                    <img
+                                        src={avatarPreview as string || profile?.avatar_url}
+                                        alt="avatar"
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    profile?.username?.[0]?.toUpperCase()
+                                )}
+                            </div>
+                            <div>
+                                <h1 className="text-xl font-bold text-gray-800">@{profile?.username}</h1>
+                                <p className="text-gray-500 text-sm">{profile?.first_name} {profile?.last_name}</p>
+                            </div>
                         </div>
-                        <div>
-                            <h1 className="text-xl font-bold">@{profile?.username}</h1>
-                            <p className="text-gray-500">{profile?.first_name} {profile?.last_name}</p>
+                        <button
+                            onClick={() => setEditing(!editing)}
+                            className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-all"
+                        >
+                            {editing ? 'Cancel' : 'Edit Profile'}
+                        </button>
+                    </div>
+    
+                    {profile?.bio && <p className="text-gray-700 text-sm">{profile?.bio}</p>}
+    
+                    <div className="flex gap-2 flex-wrap">
+                        {profile?.location && (
+                            <span className="text-gray-500 text-sm">📍 {profile?.location}</span>
+                        )}
+                        {profile?.website && (
+                            <a href={profile?.website} className="text-[#1877F2] text-sm hover:underline">
+                                🔗 {profile?.website}
+                            </a>
+                        )}
+                    </div>
+    
+                    {/* Stats */}
+                    <div className="flex gap-6 pt-2 border-t border-gray-100">
+                        <div className="text-center">
+                            <p className="text-lg font-bold text-gray-800">{posts.length}</p>
+                            <p className="text-xs text-gray-500">Posts</p>
+                        </div>
+                        <div className="text-center">
+                            <p className="text-lg font-bold text-gray-800">{profile?.followers_count || 0}</p>
+                            <p className="text-xs text-gray-500">Followers</p>
+                        </div>
+                        <div className="text-center">
+                            <p className="text-lg font-bold text-gray-800">{profile?.following_count || 0}</p>
+                            <p className="text-xs text-gray-500">Following</p>
                         </div>
                     </div>
-                    <Button onClick={() => setEditing(!editing)} variant="outline">
-                        {editing ? 'Cancel' : 'Edit Profile'}
-                    </Button>
-                </div>
-
-                {profile?.bio && <p className="text-gray-700">{profile?.bio}</p>}
-                {profile?.location && <p className="text-gray-500">📍 {profile?.location}</p>}
-                {profile?.website && <p className="text-blue-500">🔗 {profile?.website}</p>}
-
-                <div className="flex gap-4 text-sm text-gray-500">
-                    <span><strong>{posts.length}</strong> Posts</span>
-                </div>
-
-                {/* Edit Form */}
-                {editing && (
-                    <div className="space-y-3 border-t pt-4">
-                    {/* Avatar Upload */}
-                    <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
-                            {avatarPreview || profile?.avatar_url ? (
-                                <img src={avatarPreview || profile?.avatar_url} alt="avatar" className="w-full h-full object-cover" />
-                            ) : (
-                                <span className="font-bold">{profile?.username?.[0]?.toUpperCase()}</span>
-                            )}
-                        </div>
-                        <label className="cursor-pointer text-blue-500 text-sm font-semibold hover:underline">
-                            📷 Change Avatar
+    
+                    {/* Edit Form */}
+                    {editing && (
+                        <div className="space-y-3 border-t pt-4">
+                            {/* Avatar Upload */}
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
+                                    {avatarPreview || profile?.avatar_url ? (
+                                        <img src={avatarPreview as string || profile?.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <span className="font-bold">{profile?.username?.[0]?.toUpperCase()}</span>
+                                    )}
+                                </div>
+                                <label className="cursor-pointer text-[#1877F2] text-sm font-semibold hover:underline">
+                                    📷 Change Avatar
+                                    <input
+                                        type="file"
+                                        accept="image/jpeg,image/png"
+                                        className="hidden"
+                                        onChange={handleAvatarChange}
+                                    />
+                                </label>
+                            </div>
+    
+                            <div className="grid grid-cols-2 gap-3">
+                                <input
+                                    placeholder="First Name"
+                                    value={formData.first_name}
+                                    onChange={e => setFormData({ ...formData, first_name: e.target.value })}
+                                    className="px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#1877F2]"
+                                />
+                                <input
+                                    placeholder="Last Name"
+                                    value={formData.last_name}
+                                    onChange={e => setFormData({ ...formData, last_name: e.target.value })}
+                                    className="px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#1877F2]"
+                                />
+                            </div>
                             <input
-                                type="file"
-                                accept="image/jpeg,image/png"
-                                className="hidden"
-                                onChange={handleAvatarChange}
+                                placeholder="Username"
+                                value={formData.username}
+                                onChange={e => setFormData({ ...formData, username: e.target.value })}
+                                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#1877F2]"
                             />
-                        </label>
-                    </div>
-                    <div className="space-y-3 border-t pt-4">
-                        <Input
-                            placeholder="Username"
-                            value={formData.username}
-                            onChange={e => setFormData({ ...formData, username: e.target.value })}
-                        />
-                        <Input
-                            placeholder="First Name"
-                            value={formData.first_name}
-                            onChange={e => setFormData({ ...formData, first_name: e.target.value })}
-                        />
-                        <Input
-                            placeholder="Last Name"
-                            value={formData.last_name}
-                            onChange={e => setFormData({ ...formData, last_name: e.target.value })}
-                        />
-                        <Textarea
-                            placeholder="Bio (max 160 chars)"
-                            value={formData.bio}
-                            maxLength={160}
-                            onChange={e => setFormData({ ...formData, bio: e.target.value })}
-                        />
-                        <Input
-                            placeholder="Location"
-                            value={formData.location}
-                            onChange={e => setFormData({ ...formData, location: e.target.value })}
-                        />
-                        <Input
-                            placeholder="Website"
-                            value={formData.website}
-                            onChange={e => setFormData({ ...formData, website: e.target.value })}
-                        />
-                        <Button onClick={handleUpdate} disabled={loading} className="w-full">
-                            {loading ? 'Saving...' : 'Save Changes'}
-                        </Button>
-                    </div>
+                            <textarea
+                                placeholder="Bio (max 160 chars)"
+                                value={formData.bio}
+                                maxLength={160}
+                                onChange={e => setFormData({ ...formData, bio: e.target.value })}
+                                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#1877F2] resize-none"
+                                rows={3}
+                            />
+                            <input
+                                placeholder="Location"
+                                value={formData.location}
+                                onChange={e => setFormData({ ...formData, location: e.target.value })}
+                                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#1877F2]"
+                            />
+                            <input
+                                placeholder="Website"
+                                value={formData.website}
+                                onChange={e => setFormData({ ...formData, website: e.target.value })}
+                                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#1877F2]"
+                            />
+                            <button
+                                onClick={handleUpdate}
+                                disabled={loading}
+                                className="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white font-bold py-3 rounded-xl transition-all disabled:opacity-50"
+                            >
+                                {loading ? 'Saving...' : 'Save Changes'}
+                            </button>
+                        </div>
+                    )}
+                </div>
+    
+                {/* User Posts */}
+                <h2 className="font-bold text-lg text-gray-800">My Posts</h2>
+                {posts.length === 0 && (
+                    <div className="bg-white rounded-2xl shadow-sm p-8 text-center">
+                        <p className="text-gray-400 text-sm">No posts yet!</p>
                     </div>
                 )}
-            </Card>
-
-            {/* User Posts */}
-            <h2 className="font-bold text-lg">My Posts</h2>
-            {posts.length === 0 && <p className="text-gray-500">No posts yet!</p>}
-            {posts.map(post => (
-                <Card key={post.id} className="p-4 space-y-2">
-                    <p>{post.content}</p>
-                    <div className="flex items-center gap-4 text-sm text-gray-400">
-                        <span>❤️ {post.like_count}</span>
-                        <span>💬 {post.comment_count}</span>
-                        <span>{new Date(post.created_at).toLocaleDateString()}</span>
+                {posts.map(post => (
+                    <div key={post.id} className="bg-white rounded-2xl shadow-sm p-4 space-y-2">
+                        <p className="text-gray-800 text-sm">{post.content}</p>
+                        {post.image_url && (
+                            <img src={post.image_url} alt="post" className="w-full rounded-xl object-cover max-h-64" />
+                        )}
+                        <div className="flex items-center gap-4 text-sm text-gray-400 pt-2 border-t border-gray-50">
+                            <span>❤️ {post.like_count}</span>
+                            <span>💬 {post.comment_count}</span>
+                            <span>{new Date(post.created_at).toLocaleDateString()}</span>
+                        </div>
                     </div>
-                </Card>
-            ))}
+                ))}
+            </div>
         </div>
     )
 }

@@ -4,6 +4,8 @@ import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card } from "@/components/ui/card"
+import { IoMdPhotos } from "react-icons/io";
+
 
 interface CreatePostProps {
     userId: string
@@ -113,15 +115,16 @@ export default function CreatePost({ userId, onPost }: CreatePostProps) {
 
             <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                    <label className="cursor-pointer text-blue-500 text-sm font-semibold hover:underline">
-                        📷 Add Image
-                        <input
-                            type="file"
-                            accept="image/jpeg,image/png"
-                            className="hidden"
-                            onChange={handleImageChange}
-                        />
-                    </label>
+                <label className="cursor-pointer flex items-center gap-1 text-[#1877F2] text-sm font-semibold hover:underline">
+    <IoMdPhotos className="text-lg" />
+    <span>Add Image</span>
+    <input
+        type="file"
+        accept="image/jpeg,image/png"
+        className="hidden"
+        onChange={handleImageChange}
+    />
+</label>
                     <span className="text-sm text-gray-400">{content.length}/280</span>
                 </div>
                 <Button onClick={handleCreatePost} disabled={loading}>
