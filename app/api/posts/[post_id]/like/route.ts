@@ -6,25 +6,26 @@ const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-export async function POST(req: Request, { params }: { params: { post_id: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ post_id: string }> }) {
     try {
+        const { post_id } = await params
         const { user_id } = await req.json()
 
         const { data: existing } = await supabase
             .from('likes')
             .select('*')
             .eq('user_id', user_id)
-            .eq('post_id', params.post_id)
+            .eq('post_id', post_id)
             .maybeSingle()
 
         if (existing) {
             return NextResponse.json({ error: 'Already liked' }, { status: 400 })
         }
 
-        await supabase.from('likes').insert({ user_id, post_id: params.post_id })
+        await supabase.from('likes').insert({ user_id, post_id })
 
-        const { data: post } = await supabase.from('posts').select('like_count').eq('id', params.post_id).single()
-        await supabase.from('posts').update({ like_count: (post?.like_count || 0) + 1 }).eq('id', params.post_id)
+        const { data: post } = await supabase.from('posts').select('like_count').eq('id', post_id).single()
+        await supabase.from('posts').update({ like_count: (post?.like_count || 0) + 1 }).eq('id', post_id)
 
         return NextResponse.json({ message: 'Post liked successfully' }, { status: 201 })
     } catch (error) {
@@ -32,16 +33,17 @@ export async function POST(req: Request, { params }: { params: { post_id: string
     }
 }
 
-export async function DELETE(req: Request, { params }: { params: { post_id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ post_id: string }> }) {
     try {
+        const { post_id } = await params
         const { user_id } = await req.json()
 
         await supabase.from('likes').delete()
             .eq('user_id', user_id)
-            .eq('post_id', params.post_id)
+            .eq('post_id', post_id)
 
-        const { data: post } = await supabase.from('posts').select('like_count').eq('id', params.post_id).single()
-        await supabase.from('posts').update({ like_count: Math.max((post?.like_count || 0) - 1, 0) }).eq('id', params.post_id)
+        const { data: post } = await supabase.from('posts').select('like_count').eq('id', post_id).single()
+        await supabase.from('posts').update({ like_count: Math.max((post?.like_count || 0) - 1, 0) }).eq('id', post_id)
 
         return NextResponse.json({ message: 'Post unliked successfully' }, { status: 200 })
     } catch (error) {
