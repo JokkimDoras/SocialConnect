@@ -12,16 +12,26 @@ interface PostCardProps {
     post: any
     user: any
     onRefresh: () => void
+    isFollowing: boolean        // ← add
+    onFollowChange: () => void  // ← add
 }
 
-export default function PostCard({ post, user, onRefresh }: PostCardProps) {
+export default function PostCard({ post, user, onRefresh,isFollowing,onFollowChange }: PostCardProps) {
     const [likingPost, setLikingPost] = useState(false)
     const [openComment, setOpenComment] = useState(false)
     const [isLiked ,setIsLiked] = useState(false)
     const [likeCount, setLikeCount] = useState(post.like_count)
 
-   console.log(post.image_url)
     useEffect(() => {
+        const checkFollow = async () => {
+            const { data } = await supabase
+                .from('follows')
+                .select('*')
+                .eq('follower_id', user?.id)
+                .eq('following_id', post.author_id)
+                .maybeSingle()
+        }
+        if (user?.id && post.author_id !== user?.id) checkFollow()
         const checkLike = async () => {
             const { data } = await supabase
                 .from('likes')
@@ -34,7 +44,23 @@ export default function PostCard({ post, user, onRefresh }: PostCardProps) {
         if (user?.id) checkLike()
     }, [user?.id])
 
-
+    const handleFollow = async () => {
+        if (isFollowing) {
+            await fetch(`/api/users/${post.author_id}/follow`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ follower_id: user?.id })
+            })
+        } else {
+            await fetch(`/api/users/${post.author_id}/follow`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ follower_id: user?.id })
+            })
+        }
+        onFollowChange()
+    }
+    
     const handleLike = async () => {
         if (likingPost) return
         setLikingPost(true)
@@ -80,19 +106,28 @@ export default function PostCard({ post, user, onRefresh }: PostCardProps) {
 
     return (
         <Card className="p-4 space-y-2">
-            <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold">
-                {post.profiles?.avatar_url ? (
-        <img 
-            src={post.profiles.avatar_url} 
-            alt="avatar" 
-            className="w-full rounded-2xl h-full object-cover"
-        />
-    ) : (
-        post.profiles?.username?.[0]?.toUpperCase()
-    )}                </div>
-                <span className="font-semibold">@{post.profiles?.username}</span>
-            </div>
+       <div className="flex items-center gap-2">
+    <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold overflow-hidden">
+        {post.profiles?.avatar_url ? (
+            <img src={post.profiles.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+        ) : (
+            post.profiles?.username?.[0]?.toUpperCase()
+        )}
+    </div>
+    <span className="font-semibold">@{post.profiles?.username}</span>
+    {post.author_id !== user?.id && (
+        <button
+            onClick={handleFollow}
+            className={`text-xs px-2 py-1 rounded-full font-semibold ${
+                isFollowing 
+                ? 'bg-gray-200 text-gray-600' 
+                : 'bg-blue-500 text-white'
+            }`}
+        >
+            {isFollowing ? 'Following' : 'Follow'}
+        </button>
+    )}
+</div>
             {post.content && <p>{post.content}</p>}
 
             {post.image_url && (
