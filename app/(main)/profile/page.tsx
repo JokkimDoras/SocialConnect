@@ -11,7 +11,9 @@ export default function ProfilePage() {
     const [profile, setProfile] = useState<any>(null)
     const [posts, setPosts] = useState<any[]>([])
     const [editing, setEditing] = useState(false)
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(false);
+    const[avatarFile,setAvatarFile]=useState<File | null>(null);
+    const [avatarPreview,setAvatarPreview]=useState<String | null>(null)
     const [formData, setFormData] = useState({
         username: '',
         first_name: '',
@@ -32,6 +34,23 @@ export default function ProfilePage() {
             fetchProfile(data.user.id)
             fetchUserPosts(data.user.id)
         }
+    }
+
+    const handleAvatarChange = (e:React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if(!file){
+            return;
+        }
+        if(!['image/jpeg','image/png'].includes(file.type)){
+            alert('Only JPEG and PNG files are allowed')
+            return;
+        }
+        if(file.size>2 * 1024 *1024) {
+            alert('File size must be less then 2MB!')
+            return;
+        }
+        setAvatarFile(file)
+        setAvatarPreview(URL.createObjectURL(file))
     }
 
     const fetchProfile = async (userId: string) => {
@@ -63,11 +82,32 @@ export default function ProfilePage() {
 
     const handleUpdate = async () => {
         setLoading(true)
-        
+    
+        let avatar_url = profile?.avatar_url
+    
+        // Upload avatar if selected
+        if (avatarFile) {
+            const formData = new FormData()
+            formData.append('file', avatarFile)
+    
+            const uploadRes = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+            const uploadData = await uploadRes.json()
+    
+            if (uploadData.error) {
+                alert(uploadData.error)
+                setLoading(false)
+                return
+            }
+            avatar_url = uploadData.url
+        }
+    
         const res = await fetch(`/api/users/${user?.id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData)
+            body: JSON.stringify({ ...formData, avatar_url })
         })
     
         const data = await res.json()
@@ -80,6 +120,7 @@ export default function ProfilePage() {
     
         fetchProfile(user?.id)
         setEditing(false)
+        setAvatarFile(null)
         setLoading(false)
     }
 
@@ -90,7 +131,15 @@ export default function ProfilePage() {
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-2xl font-bold">
-                            {profile?.username?.[0]?.toUpperCase()}
+                        {avatarPreview || profile?.avatar_url ? (
+        <img 
+            src={avatarPreview || profile?.avatar_url} 
+            alt="avatar" 
+            className="w-full h-full object-cover"
+        />
+    ) : (
+        profile?.username?.[0]?.toUpperCase()
+    )}
                         </div>
                         <div>
                             <h1 className="text-xl font-bold">@{profile?.username}</h1>
@@ -112,6 +161,26 @@ export default function ProfilePage() {
 
                 {/* Edit Form */}
                 {editing && (
+                    <div className="space-y-3 border-t pt-4">
+                    {/* Avatar Upload */}
+                    <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
+                            {avatarPreview || profile?.avatar_url ? (
+                                <img src={avatarPreview || profile?.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+                            ) : (
+                                <span className="font-bold">{profile?.username?.[0]?.toUpperCase()}</span>
+                            )}
+                        </div>
+                        <label className="cursor-pointer text-blue-500 text-sm font-semibold hover:underline">
+                            📷 Change Avatar
+                            <input
+                                type="file"
+                                accept="image/jpeg,image/png"
+                                className="hidden"
+                                onChange={handleAvatarChange}
+                            />
+                        </label>
+                    </div>
                     <div className="space-y-3 border-t pt-4">
                         <Input
                             placeholder="Username"
@@ -147,6 +216,7 @@ export default function ProfilePage() {
                         <Button onClick={handleUpdate} disabled={loading} className="w-full">
                             {loading ? 'Saving...' : 'Save Changes'}
                         </Button>
+                    </div>
                     </div>
                 )}
             </Card>

@@ -20,7 +20,7 @@ export default function PostCard({ post, user, onRefresh }: PostCardProps) {
     const [isLiked ,setIsLiked] = useState(false)
     const [likeCount, setLikeCount] = useState(post.like_count)
 
-
+   console.log(post.image_url)
     useEffect(() => {
         const checkLike = async () => {
             const { data } = await supabase
@@ -82,12 +82,26 @@ export default function PostCard({ post, user, onRefresh }: PostCardProps) {
         <Card className="p-4 space-y-2">
             <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold">
-                    {post.profiles?.username?.[0]?.toUpperCase()}
-                </div>
+                {post.profiles?.avatar_url ? (
+        <img 
+            src={post.profiles.avatar_url} 
+            alt="avatar" 
+            className="w-full rounded-2xl h-full object-cover"
+        />
+    ) : (
+        post.profiles?.username?.[0]?.toUpperCase()
+    )}                </div>
                 <span className="font-semibold">@{post.profiles?.username}</span>
             </div>
+            {post.content && <p>{post.content}</p>}
 
-            <p>{post.content}</p>
+            {post.image_url && (
+    <img 
+        src={post.image_url} 
+        alt="post image" 
+        className="w-full rounded-lg object-cover max-h-96"
+    />
+)}
 
 
             <div className="flex items-center justify-between">
